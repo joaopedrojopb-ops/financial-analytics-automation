@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Operations Automation Hub - Interactive Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandBlue: '#0f172a',
+                        brandAccent: '#3b82f6',
+                        brandLight: '#f8fafc'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        
+        .terminal-scroll::-webkit-scrollbar { width: 6px; }
+        .terminal-scroll::-webkit-scrollbar-track { background: #0f172a; }
+        .terminal-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <nav class="bg-slate-900 p-4 shadow-md sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="text-white text-xl font-bold flex items-center tracking-wide">
+                <i class="fas fa-network-wired text-blue-500 text-2xl mr-3"></i>
+                <span>Enterprise <span class="font-light text-slate-400">Financial Automation Hub</span></span>
+            </div>
+            <div>
+                <span class="bg-emerald-600 text-white text-xs font-semibold py-1.5 px-3 rounded-full uppercase tracking-wider shadow flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                    Simulation Online
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-6 px-4 pb-12 flex-grow flex flex-col md:flex-row gap-6">
+        
+        <!-- Sidebar Navigation -->
+        <div class="w-full md:w-64 flex-shrink-0">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sticky top-24">
+                <div class="text-xs text-gray-400 font-bold uppercase mb-4 ml-1">Workflow Modules</div>
+                <nav class="flex flex-col space-y-1">
+                    <button onclick="switchTab('tab-repasses')" id="btn-tab-repasses" class="tab-btn bg-blue-50 text-blue-700 border-l-4 border-blue-600 flex items-center gap-3 p-3 w-full text-left font-semibold rounded-r-lg transition-colors text-sm">
+                        <i class="fas fa-file-excel w-5 text-center"></i> Annual Settlement
+                    </button>
+                    <button onclick="switchTab('tab-notas')" id="btn-tab-notas" class="tab-btn text-gray-600 hover:bg-gray-50 flex items-center gap-3 p-3 w-full text-left font-semibold rounded-r-lg transition-colors border-l-4 border-transparent text-sm">
+                        <i class="fas fa-envelope-open-text w-5 text-center"></i> Fiscal & OCR Bot
+                    </button>
+                    <button onclick="switchTab('tab-restituicao')" id="btn-tab-restituicao" class="tab-btn text-gray-600 hover:bg-gray-50 flex items-center gap-3 p-3 w-full text-left font-semibold rounded-r-lg transition-colors border-l-4 border-transparent text-sm">
+                        <i class="fas fa-hand-holding-usd w-5 text-center"></i> Refund Audit
+                    </button>
+                    <button onclick="switchTab('tab-cnpj')" id="btn-tab-cnpj" class="tab-btn text-gray-600 hover:bg-gray-50 flex items-center gap-3 p-3 w-full text-left font-semibold rounded-r-lg transition-colors border-l-4 border-transparent text-sm">
+                        <i class="fas fa-building w-5 text-center"></i> Corporate Validation
+                    </button>
+                </nav>
+                
+                <div class="mt-8 pt-6 border-t border-gray-100">
+                    <div class="bg-slate-50 p-3.5 rounded-lg border border-slate-200">
+                        <h4 class="text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider"><i class="fab fa-python mr-1"></i> Core Stack</h4>
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="text-xs bg-white border border-gray-200 text-slate-700 py-0.5 px-2 rounded">Python</span>
+                            <span class="text-xs bg-white border border-gray-200 text-slate-700 py-0.5 px-2 rounded">Pandas</span>
+                            <span class="text-xs bg-white border border-gray-200 text-slate-700 py-0.5 px-2 rounded">Selenium</span>
+                            <span class="text-xs bg-white border border-gray-200 text-slate-700 py-0.5 px-2 rounded">SQLite</span>
+                            <span class="text-xs bg-white border border-gray-200 text-slate-700 py-0.5 px-2 rounded">OCR</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-grow bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden min-h-[600px]">
+            
+            <!-- TAB 1: Annual Settlement -->
+            <div id="tab-repasses" class="tab-content fade-in h-full flex flex-col">
+                <div class="bg-slate-50 border-b border-gray-200 px-8 py-5">
+                    <h2 class="text-xl font-bold text-slate-800">Large-Scale Annual Settlement Processor</h2>
+                    <p class="text-gray-500 text-xs mt-1">High-throughput search and metric extraction across massive historical Excel reports.</p>
+                </div>
+                <div class="p-8 flex-grow">
+                    <div class="flex gap-4 mb-6">
+                        <div class="flex-grow">
+                            <input type="text" id="searchTermRepasse" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 border p-3 text-sm" placeholder="Search branch or business unit..." value="Regional Operations Unit - Central">
+                        </div>
+                        <button onclick="runRepasse()" id="btnRepasse" class="bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2 px-6 rounded-lg w-44 flex justify-center items-center text-sm shadow">
+                            <i class="fas fa-search mr-2"></i> Query Data
+                        </button>
+                    </div>
+                    
+                    <div id="termRepasse" class="hidden bg-slate-900 rounded-lg p-4 text-emerald-400 font-mono text-xs mb-6 h-40 overflow-y-auto terminal-scroll relative">
+                        <div class="absolute top-4 right-4 loader-div hidden"><div class="loader border-t-emerald-400"></div></div>
+                        <p>> Initializing Pandas engine...</p>
+                        <p class="log-item hidden mt-1">> Parsing target dataset ANNUAL_RECONCILIATION.xlsx (+50k records)...</p>
+                        <p class="log-item hidden mt-1">> Applying indexed branch filter criteria...</p>
+                        <p class="log-item hidden mt-1 text-blue-300">> Extraction completed. Rendering analytical summary...</p>
+                    </div>
+
+                    <div id="resRepasse" class="hidden overflow-x-auto rounded-lg border border-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Period</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Branch / Unit</th>
+                                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Settled Amount</th>
+                                    <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200 text-sm">
+                                <tr>
+                                    <td class="px-6 py-4 text-gray-900">Sep/2026</td>
+                                    <td class="px-6 py-4 text-gray-600 polo-name">Regional Operations Unit - Central</td>
+                                    <td class="px-6 py-4 text-gray-900 text-right font-mono font-semibold">$ 45,230.00</td>
+                                    <td class="px-6 py-4 text-center"><span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800">Reconciled</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: Fiscal & OCR Bot -->
+            <div id="tab-notas" class="tab-content hidden fade-in h-full flex flex-col">
+                <div class="bg-slate-50 border-b border-gray-200 px-8 py-5">
+                    <h2 class="text-xl font-bold text-slate-800">Automated Fiscal Document Processing & OCR</h2>
+                    <p class="text-gray-500 text-xs mt-1">Automated invoice polling, tax withholding analysis, digital audit stamping, and spooling.</p>
+                </div>
+                <div class="p-8 flex-grow">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-5 mb-6 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-semibold text-blue-900 text-sm mb-1">Target Mailbox: <span class="font-mono text-xs bg-white px-2 py-0.5 rounded border border-blue-200">invoices.processing@corporate.local</span></h3>
+                            <p class="text-xs text-blue-700">Service scans incoming emails, ingests unstructured PDF invoices, verifies tax withholdings, and writes audit stamps.</p>
+                        </div>
+                        <button onclick="runNotas()" id="btnNotas" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg text-sm flex items-center shadow">
+                            <i class="fas fa-play mr-2"></i> Trigger Pipeline
+                        </button>
+                    </div>
+
+                    <div id="termNotas" class="hidden bg-slate-900 rounded-lg p-4 text-emerald-400 font-mono text-xs mb-6 h-48 overflow-y-auto terminal-scroll relative">
+                        <div class="absolute top-4 right-4 loader-div hidden"><div class="loader border-t-emerald-400"></div></div>
+                        <p>> Connecting to IMAP server via TLS...</p>
+                        <p class="log-item hidden mt-1">> Scanning unread messages containing 'Invoice / Tax Receipt'... Found: 2 files.</p>
+                        <p class="log-item hidden mt-1">> Ingesting PDF payloads into memory (INV_9872.pdf, INV_9873.pdf)...</p>
+                        <p class="log-item hidden mt-1 text-amber-300">> Running OCR & Regex parser: extracting gross amounts, tax codes, and withholdings...</p>
+                        <p class="log-item hidden mt-1 text-purple-300">> Applying digital audit watermark 'AUDITED & VALIDATED' via PyMuPDF...</p>
+                        <p class="log-item hidden mt-1">> Dispatching transaction status to relational database and print spooler... Done.</p>
+                    </div>
+
+                    <div id="resNotas" class="hidden overflow-x-auto rounded-lg border border-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Supplier</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Invoice ID</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tax Verification</th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Audit Stamp</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-4 py-4 font-medium text-gray-900">Apex EdTech Solutions LLC</td>
+                                    <td class="px-4 py-4 text-gray-500 font-mono">INV-9872</td>
+                                    <td class="px-4 py-4 text-gray-600">
+                                        Gross: $ 5,000.00<br>
+                                        <span class="text-rose-600 text-xs font-medium">- Withheld Tax (1.5%): $ 75.00</span>
+                                    </td>
+                                    <td class="px-4 py-4 text-center">
+                                        <span class="px-2.5 py-1 bg-purple-100 text-purple-800 rounded-md text-xs font-bold inline-flex items-center gap-1">
+                                            <i class="fas fa-stamp"></i> Confirmed
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: Refund Audit -->
+            <div id="tab-restituicao" class="tab-content hidden fade-in h-full flex flex-col">
+                <div class="bg-slate-50 border-b border-gray-200 px-8 py-5">
+                    <h2 class="text-xl font-bold text-slate-800">Operational Refund & Duplicate Payment Audit</h2>
+                    <p class="text-gray-500 text-xs mt-1">Direct indexed SQL lookup against Accounts Payable logs by entity identifier.</p>
+                </div>
+                <div class="p-8 flex-grow">
+                    <div class="flex gap-4 mb-6">
+                        <input type="text" id="searchTermRest" class="w-full md:w-2/3 border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 border p-3 text-sm" placeholder="Search reference code..." value="REC-80491-X">
+                        <button onclick="runRest()" id="btnRest" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg w-full md:w-1/3 flex justify-center items-center text-sm shadow">
+                            <i class="fas fa-search-dollar mr-2"></i> Execute Lookup
+                        </button>
+                    </div>
+
+                    <div id="termRest" class="hidden bg-slate-900 rounded-lg p-4 text-emerald-400 font-mono text-xs mb-6 h-32 overflow-y-auto terminal-scroll relative">
+                        <div class="absolute top-4 right-4 loader-div hidden"><div class="loader border-t-emerald-400"></div></div>
+                        <p>> Connecting to sanitized SQLite database pool (WAL mode enabled)...</p>
+                        <p class="log-item hidden mt-1">> Executing parameterized SQL query on transactions table...</p>
+                        <p class="log-item hidden mt-1">> Validating duplicate billing event against ERP ledger...</p>
+                        <p class="log-item hidden mt-1 text-emerald-300">> Record validated and matched successfully.</p>
+                    </div>
+
+                    <div id="resRest" class="hidden bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                        <div class="bg-emerald-50 px-6 py-3 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="font-bold text-emerald-800 text-sm flex items-center"><i class="fas fa-check-circle mr-2"></i> Payment Reconciled & Processed</h3>
+                            <span class="text-xs text-emerald-700 font-mono">TX_ID: #REF-2026-9081</span>
+                        </div>
+                        <div class="p-6 grid grid-cols-2 gap-6 text-sm">
+                            <div>
+                                <p class="text-xs text-gray-400 uppercase tracking-wider font-bold mb-1">Entity Details</p>
+                                <p class="text-gray-900 font-medium">Standard Account Holder</p>
+                                <p class="text-gray-500 text-xs">Reference: <span id="raDisplay" class="font-mono">REC-80491-X</span> | Ledger: Active</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 uppercase tracking-wider font-bold mb-1">Settlement Details</p>
+                                <p class="text-gray-800 font-medium">Reason: <span class="text-gray-600 font-normal">Duplicate Payment Adjustment</span></p>
+                                <p class="text-gray-900 font-bold mt-1">Reimbursed: <span class="text-blue-600 font-mono text-base">$ 540.00</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: Corporate Validation -->
+            <div id="tab-cnpj" class="tab-content hidden fade-in h-full flex flex-col">
+                <div class="bg-slate-50 border-b border-gray-200 px-8 py-5">
+                    <h2 class="text-xl font-bold text-slate-800">Corporate & Tax Compliance Lookup API</h2>
+                    <p class="text-gray-500 text-xs mt-1">Automated endpoint validation to verify legal standing, address, and fiscal status.</p>
+                </div>
+                <div class="p-8 flex-grow">
+                    <div class="flex gap-4 mb-6">
+                        <input type="text" id="searchTermCnpj" class="w-full md:w-2/3 border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 border p-3 font-mono text-sm" placeholder="Enter Registration / Tax ID..." value="06.099.229/0001-01">
+                        <button onclick="runCnpj()" id="btnCnpj" class="bg-slate-800 hover:bg-black text-white font-semibold py-2 px-6 rounded-lg w-full md:w-1/3 flex justify-center items-center text-sm shadow">
+                            <i class="fas fa-globe mr-2"></i> Query Registry API
+                        </button>
+                    </div>
+
+                    <div id="termCnpj" class="hidden bg-slate-900 rounded-lg p-4 text-emerald-400 font-mono text-xs mb-6 h-40 overflow-y-auto terminal-scroll relative">
+                        <div class="absolute top-4 right-4 loader-div hidden"><div class="loader border-t-emerald-400"></div></div>
+                        <p>> Sanitizing and formatting registration string...</p>
+                        <p class="log-item hidden mt-1">> Dispatching asynchronous GET request with throttling...</p>
+                        <p class="log-item hidden mt-1">> Parsing returned JSON schema...</p>
+                        <p class="log-item hidden mt-1 text-purple-300">> Checking fiscal eligibility and special tax brackets...</p>
+                        <p class="log-item hidden mt-1 text-emerald-300">> Status 200 OK. Structuring entity metadata...</p>
+                    </div>
+
+                    <div id="resCnpj" class="hidden bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                        <div class="flex items-start justify-between mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 uppercase">Educational Services Enterprise Inc.</h3>
+                                <p class="text-gray-500 text-xs">Trading Name: Regional Education Operations Hub</p>
+                            </div>
+                            <span class="px-3 py-1 bg-emerald-100 text-emerald-800 font-semibold rounded-full text-xs flex items-center shadow-sm">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span> ACTIVE REGISTRATION
+                            </span>
+                        </div>
+                        <hr class="my-4 border-gray-100">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <p class="text-gray-400 text-xs font-bold uppercase mb-1">Primary Activity</p>
+                                <p class="text-gray-800 text-xs">85.32-5-00 - Higher Education Services & Academic Support</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400 text-xs font-bold uppercase mb-1">Corporate Registration</p>
+                                <p class="text-gray-800 text-xs">Corporation / Limited Liability (LLC equivalent)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-blue-50', 'text-blue-700', 'border-blue-600');
+                el.classList.add('text-gray-600', 'border-transparent', 'hover:bg-gray-50');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.remove('text-gray-600', 'border-transparent', 'hover:bg-gray-50');
+            activeBtn.classList.add('bg-blue-50', 'text-blue-700', 'border-blue-600');
+        }
+
+        function runSim(btnId, termId, resId, defaultLogCount, timePerLog) {
+            const btn = document.getElementById(btnId);
+            const term = document.getElementById(termId);
+            const res = document.getElementById(resId);
+            
+            btn.disabled = true;
+            btn.classList.add('opacity-70', 'cursor-wait');
+            
+            res.classList.add('hidden');
+            term.classList.remove('hidden');
+            
+            term.querySelector('.loader-div').classList.remove('hidden');
+            
+            const logs = term.querySelectorAll('.log-item');
+            logs.forEach(log => log.classList.add('hidden'));
+
+            logs.forEach((log, index) => {
+                setTimeout(() => {
+                    log.classList.remove('hidden');
+                    term.scrollTop = term.scrollHeight;
+                }, timePerLog * (index + 1));
+            });
+
+            setTimeout(() => {
+                term.querySelector('.loader-div').classList.add('hidden');
+                res.classList.remove('hidden');
+                btn.disabled = false;
+                btn.classList.remove('opacity-70', 'cursor-wait');
+            }, timePerLog * (logs.length + 1) + 400);
+        }
+
+        function runRepasse() {
+            const val = document.getElementById('searchTermRepasse').value || 'Regional Branch';
+            document.querySelectorAll('.polo-name').forEach(el => el.innerText = val);
+            runSim('btnRepasse', 'termRepasse', 'resRepasse', 3, 600);
+        }
+
+        function runNotas() {
+            runSim('btnNotas', 'termNotas', 'resNotas', 5, 700);
+        }
+
+        function runRest() {
+            const val = document.getElementById('searchTermRest').value || 'REC-80491-X';
+            document.getElementById('raDisplay').innerText = val;
+            runSim('btnRest', 'termRest', 'resRest', 3, 500);
+        }
+
+        function runCnpj() {
+            runSim('btnCnpj', 'termCnpj', 'resCnpj', 4, 450);
+        }
+    </script>
+</body>
+</html>
